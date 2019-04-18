@@ -1,49 +1,29 @@
 PROJECT(cc)
-#Required in DGtal
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-
+cmake_minimum_required(VERSION 3.1)
 set(ROOT "${CMAKE_CURRENT_LIST_DIR}")
+message(${ROOT})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-FIND_PACKAGE(DGtal REQUIRED)
-FIND_PACKAGE( Boost 1.40 COMPONENTS program_options REQUIRED )
-find_package(LIBIGL REQUIRED QUIET)
-find_package(Qt5Core)
-find_package(Qt5Widgets)
-find_package(Qt53DCore)
-find_package(Qt53DExtras)
-find_package(Qt53DInput)
-find_package(Qt53DLogic)
-find_package(Qt53DRender)
-#find_package(QGLViewer)
-#set(QGLVIEWER_INCLUDE_DIR /usr/local/lib/QGLViewer.framework/Headers)
-#set(QGLVIEWER_LIBRARIES /usr/local/lib/QGLViewer.framework)
+### libIGL options: choose between header only and compiled static library
+option(LIBIGL_USE_STATIC_LIBRARY     "Use libigl as static library" OFF)
+option(LIBIGL_WITH_OPENGL            "Use OpenGL"         ON)
+option(LIBIGL_WITH_OPENGL_GLFW       "Use GLFW"           ON)
 
-INCLUDE_DIRECTORIES(${DGTAL_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
-INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
-#include_directories( ${QGLVIEWER_INCLUDE_DIR} )   
-include_directories(${Qt5Core_INCLUDE_DIRS} 
-   ${Qt5Widgets_INCLUDE_DIRS} 
-   ${Qt53DCore_INCLUDE_DIRS}
-   ${Qt53DExtras_INCLUDE_DIRS}
-   ${Qt53DInput_INCLUDE_DIRS}
-   ${Qt53DLogic_INCLUDE_DIRS}
-   ${Qt53DRender_INCLUDE_DIRS})
+find_package(LIBIGL REQUIRED)
 
-set(UI_LIBS  Qt5::Core Qt5::Widgets Qt5::3DCore Qt5::3DExtras 
-   Qt5::3DExtras Qt5::3DInput Qt5::3DLogic
-   Qt5::3DRender CACHE INTERNAL "" FORCE)
+# DGtal and Boost
+find_package(DGtal REQUIRED)
+find_package(Boost 1.40 COMPONENTS program_options REQUIRED)
 
-LINK_DIRECTORIES(${DGTAL_LIBRARY_DIRS})
+include_directories(${DGTAL_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIR})
 
-#ADD_EXECUTABLE(helloworld helloworld)
-#ADD_EXECUTABLE(vol_viewer vol_viewer)
-#ADD_EXECUTABLE(connected_comp connected_comp.cpp)
-ADD_EXECUTABLE(shortcuts shortcuts.cpp)
+link_directories(${DGTAL_LIBRARY_DIRS})
 
-#TARGET_LINK_LIBRARIES(helloworld ${DGTAL_LIBRARIES})
-#TARGET_LINK_LIBRARIES(vol_viewer ${DGTAL_LIBRARIES} ${Boost_LIBRARIES})
-#target_link_libraries(shortcuts ${UI_LIBS})
+# executable
+add_executable(${PROJECT_NAME} shortcuts.cpp)
+#target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${OPENGL_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${ROOT}/eigen/)
-TARGET_LINK_LIBRARIES(shortcuts ${DGTAL_LIBRARIES} ${Boost_LIBRARIES} igl::core)
+#target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${ROOT}/glfw/include)
+#target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${ROOT}/glad/include)
+target_link_libraries(${PROJECT_NAME} ${DGTAL_LIBRARIES} ${Boost_LIBRARIES} igl::opengl igl::opengl_glfw igl::core)
